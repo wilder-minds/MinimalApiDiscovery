@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <PackageId>WilderMinds.$(AssemblyName)</PackageId>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>WilderMinds.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+
+</Project>
