@@ -9,8 +9,21 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace WilderMinds.MinimalApiDiscovery;
 
+/// <summary>
+/// Extension Methods for MinimalApiDiscovery
+/// </summary>
 public static class ExtensionMethods
 {
+
+  /// <summary>
+  /// Extends the IServiceCollection to support specifying a single assembly
+  /// that contains classes that implement the <see cref="IApi"/> interface and 
+  /// register them with the service collection with a specific lifetime.
+  /// </summary>
+  /// <param name="coll">The service collection.</param>
+  /// <param name="assembly">A single assembly.</param>
+  /// <param name="lifetime">Type of lifetime required for the APIs. Defaults to Transient</param>
+  /// <returns>The same service collection.</returns>
   public static IServiceCollection AddApis(this IServiceCollection coll,
     Assembly assembly,
     ServiceLifetime lifetime = ServiceLifetime.Transient)
@@ -18,42 +31,95 @@ public static class ExtensionMethods
     return coll.AddApis(new Assembly[] { assembly });
   }
 
+  /// <summary>
+  /// Extends the IServiceCollection to support specifying just a lifetime a single assembly
+  /// that contains classes that implement the <see cref="IApi"/> interface and 
+  /// register them with the service collection with a specific lifetime.
+  /// </summary>
+  /// <param name="coll">The service collection.</param>
+  /// <param name="lifetime">Type of lifetime required for the APIs. Defaults to Transient.</param>
+  /// <returns>The same service collection.</returns>
   public static IServiceCollection AddApis(this IServiceCollection coll,
-  Assembly[]? searchAssemblies = null,
-  ServiceLifetime lifetime = ServiceLifetime.Transient)
+    ServiceLifetime lifetime)
   {
-    // Default to all assemblies
-    if (searchAssemblies is null) searchAssemblies = AppDomain.CurrentDomain.GetAssemblies();
+    return coll.AddApis((Assembly[]?)null, lifetime);
+  }
 
-    // Check all assemblies
-    foreach (var assembly in searchAssemblies) 
+  /// <summary>
+  /// Extends the IServiceCollection to support specifying a collection of assemblies 
+  /// for classes that contains classes that implement the <see cref="IApi"/> 
+  /// interface and register them with the service collection with a specific lifetime.
+  /// </summary>
+  /// <param name="coll">The service collection.</param>
+  /// <param name="searchAssemblies">
+  ///   A collection of assemblies to search (defaults to all loaded assemblies)
+  /// </param>
+  /// <param name="lifetime">Type of lifetime required for the APIs. Defaults to Transient</param>
+  /// <returns>The same service collection.</returns>
+  /// <exception cref="MinimalApiDiscoverException"></exception>
+  public static IServiceCollection AddApis(this IServiceCollection coll,
+    Assembly[]? searchAssemblies = null,
+    ServiceLifetime lifetime = ServiceLifetime.Transient)
+  {
+    try
     {
-      // Find the IApi types
-      var apis = assembly.GetTypes()
-        .Where(t => t.IsAssignableTo(typeof(IApi)) && t.IsClass && !t.IsAbstract)
-        .ToArray();
-
-      // Add them all to the Service Collection
-      foreach (var api in apis)
+      // Default to all assemblies
+      if (searchAssemblies is null || !searchAssemblies.Any())
       {
-        coll.Add(new ServiceDescriptor(typeof(IApi), api, lifetime));
+        searchAssemblies = AppDomain.CurrentDomain.GetAssemblies();
       }
+
+      // Check all assemblies
+      foreach (var assembly in searchAssemblies)
+      {
+        // Find the IApi types
+        var apis = assembly.GetTypes()
+          .Where(t => t.IsAssignableTo(typeof(IApi)) && t.IsClass && !t.IsAbstract)
+          .ToArray();
+
+        // Add them all to the Service Collection
+        foreach (var api in apis)
+        {
+          coll.Add(new ServiceDescriptor(typeof(IApi), api, lifetime));
+        }
+      }
+      return coll;
     }
-    return coll;
+    catch (Exception ex)
+    {
+      throw new MinimalApiDiscoverException("Exception thrown while adding IApi Classes to Service Collection", ex);
+    }
   }
 
 
-  public static WebApplication UseApis(this WebApplication app)
+  /// <summary>
+  /// This method allows you to call <seealso cref="IApi.Register"/> 
+  /// on all services that implement the IApi type.
+  /// </summary>
+  /// <param name="app">
+  /// The Web Application to register the 
+  /// <seealso cref="IApi"/> derived classes.
+  /// </param>
+  /// <returns>The same WebApplication object.</returns>
+  /// <exception cref="MinimalApiDiscoverException"></exception>
+  public static WebApplication MapApis(this WebApplication app)
   {
-    var apis = app.Services.GetServices<IApi>();
-
-    foreach (var api in apis)
+    try
     {
-      if (api is null) throw new InvalidProgramException("Apis not found");
+      var apis = app.Services.GetServices<IApi>();
 
-      api.Register(app);
+      foreach (var api in apis)
+      {
+        if (api is null) throw new InvalidProgramException("Apis not found");
+
+        api.Register(app);
+      }
+
+      return app;
     }
-
-    return app;
+    catch (Exception ex)
+    {
+      throw new MinimalApiDiscoverException("Exception thrown while registering IApi Classes", ex);
+    }
   }
 }

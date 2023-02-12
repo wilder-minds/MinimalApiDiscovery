@@ -7,6 +7,21 @@
     <LangVersion>latest</LangVersion>
     <RootNamespace>WilderMinds.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
     <OutputType>Library</OutputType>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <Title>MinimalApiDiscovery</Title>
+    <Authors>Shawn WIldermuth</Authors>
+    <Company>Wilder Minds LLC</Company>
+    <Description>A utility library to allow for structuring Minimal APIs and registering them via reflection.</Description>
+    <Copyright>2023, Wilder Minds LLC</Copyright>
+    <PackageProjectUrl>https://github.com/wilder-minds/minimalapidiscovery</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/wilder-minds/minimalapidiscovery</RepositoryUrl>
+    <PackageTags>C#,Minimal APIs, ASP.NET Core</PackageTags>
+    <PackageReleaseNotes>Initial Version.</PackageReleaseNotes>
+    <AssemblyVersion>0.0.1.0</AssemblyVersion>
+    <FileVersion>0.0.1.0</FileVersion>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <IsPackable>true</IsPackable>
+    <Version>0.1.0</Version>
   </PropertyGroup>
 
 </Project>
