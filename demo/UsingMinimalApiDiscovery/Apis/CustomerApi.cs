@@ -43,6 +43,4 @@ public class CustomerApi : IApi
     if (result) return Results.Ok();
     return Results.BadRequest();
   }
-
-
 }
