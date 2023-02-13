@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace WilderMinds.MinimalApiDiscovery;
 
@@ -80,6 +81,17 @@ public static class ExtensionMethods
         // Add them all to the Service Collection
         foreach (var api in apis)
         {
+          var ctors = api.GetConstructors();
+          foreach (var c in ctors)
+          {
+            if (c.GetParameters().Length != 0)
+            {
+              var factory = LoggerFactory.Create(cfg => cfg.AddConsole());
+              var logger = factory.CreateLogger("MinimalApiDiscovery");
+              logger.LogWarning("Using Constructor Injection on classes registered through IApi will cause a long-lived singleton. Please only use parameter injection.");
+              break;
+            }
+          }
           coll.Add(new ServiceDescriptor(typeof(IApi), api, lifetime));
         }
       }
