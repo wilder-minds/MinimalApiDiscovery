@@ -12,8 +12,8 @@ public class DumbApi : IApi
 {
   public void Register(WebApplication app)
   {
-    app.MapGet("/api", () => "Works");
+    app.MapGet("/api", Get);
   }
 
-
+  static IResult Get() => Results.Ok("Works");
 }
