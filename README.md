@@ -83,6 +83,7 @@ public class CustomerApi : IApi
     grp.MapDelete("{id:int}", DeleteCustomer);
   }
 
+  // Using static methods to ensure that the class doesn't hold state
   static async Task<IResult> GetCustomers(CustomerRepository repo)
   {
     return Results.Ok(await repo.GetCustomers());
