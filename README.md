@@ -1,10 +1,19 @@
 # MinimalApiDiscovery
 
-This project is aimed to simplify the registration of Minimal APIs as projects grow. This is an idea I've been fumbling with for a few months and thought I'd put it into code. The project is open to PRs or discussions about how we could do this better or whether this even needs to exist. 
+This project is aimed to simplify the registration of Minimal APIs 
+as projects grow. This is an idea I've been fumbling with for a few 
+months and thought I'd put it into code. The project is open to PRs 
+or discussions about how we could do this better or whether this 
+even needs to exist. 
 
-Note that if you're building Microservices, using this amount of plumbing is probably not required, but for larger projects I think provides a cleaner way of handling mapping.
+Note that if you're building Microservices, using this amount of 
+plumbing is probably not required, but for larger projects I think 
+provides a cleaner way of handling mapping.
 
-The basic idea of this small library is to allow you to annotate a class with an interface that allows simplified mapping of Minimal APIs.
+The basic idea of this small library is to allow you to annotate 
+a class with an interface that allows simplified mapping of Minimal APIs.
+
+Note: I have a complete write-up and video of this package at: https://wildermuth.com/2023/02/22/minimal-api-discovery/
 
 To get started, you can just install the package from Nuget or using the .NET tool:
 
@@ -53,7 +62,9 @@ public class StateApi : IApi
 }
 ```
 
-Within the Register call, you can simply create your mapped APIs. But you can also use non-lambdas if that is easier:
+Within the Register call, you can simply create your mapped APIs. But 
+you can also use non-lambdas if that is easier (though I suggest static methods
+to prevent usage of instance data that will become a singleton):
 
 ```csharp
 using WilderMinds.MinimalApiDiscovery;
@@ -72,27 +83,27 @@ public class CustomerApi : IApi
     grp.MapDelete("{id:int}", DeleteCustomer);
   }
 
-  private async Task<IResult> GetCustomers(CustomerRepository repo)
+  static async Task<IResult> GetCustomers(CustomerRepository repo)
   {
     return Results.Ok(await repo.GetCustomers());
   }
 
-  private async Task<IResult> GetCustomer(CustomerRepository repo, int id)
+  static async Task<IResult> GetCustomer(CustomerRepository repo, int id)
   {
     return Results.Ok(await repo.GetCustomer(id));
   }
 
-  private async Task<IResult> SaveCustomer(CustomerRepository repo, Customer model)
+  static async Task<IResult> SaveCustomer(CustomerRepository repo, Customer model)
   {
     return Results.Created($"/api/customer/{model.Id}", await repo.SaveCustomer(model));
   }
 
-  private async Task<IResult> UpdateCustomer(CustomerRepository repo, Customer model)
+  static async Task<IResult> UpdateCustomer(CustomerRepository repo, Customer model)
   {
     return Results.Ok(await repo.UpdateCustomer(model));
   }
 
-  private async Task<IResult> DeleteCustomer(CustomerRepository repo, int id)
+  static async Task<IResult> DeleteCustomer(CustomerRepository repo, int id)
   {
     var result = await repo.DeleteCustomer(id);
     if (result) return Results.Ok();

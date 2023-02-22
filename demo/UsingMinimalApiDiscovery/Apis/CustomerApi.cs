@@ -7,6 +7,17 @@ namespace UsingMinimalApiDiscovery.Apis;
 
 public class CustomerApi : IApi
 {
+  private CustomerRepository _repo;
+
+  // MinimalApiDiscovery will log a warning because
+  // the repo will become a singleton and lifetime 
+  // will be tied to the implementation methods.
+  // Better to use method injection in this case.
+  public CustomerApi(CustomerRepository repo)
+  {
+    _repo = repo;
+  }
+
   public void Register(WebApplication app)
   {
     var grp = app.MapGroup("/api/customers");
@@ -17,27 +28,27 @@ public class CustomerApi : IApi
     grp.MapDelete("{id:int}", DeleteCustomer);
   }
 
-  private async Task<IResult> GetCustomers(CustomerRepository repo)
+  static async Task<IResult> GetCustomers(CustomerRepository repo)
   {
     return Results.Ok(await repo.GetCustomers());
   }
 
-  private async Task<IResult> GetCustomer(CustomerRepository repo, int id)
+  static async Task<IResult> GetCustomer(CustomerRepository repo, int id)
   {
     return Results.Ok(await repo.GetCustomer(id));
   }
 
-  private async Task<IResult> SaveCustomer(CustomerRepository repo, Customer model)
+  static async Task<IResult> SaveCustomer(CustomerRepository repo, Customer model)
   {
     return Results.Created($"/api/customer/{model.Id}", await repo.SaveCustomer(model));
   }
 
-  private async Task<IResult> UpdateCustomer(CustomerRepository repo, Customer model)
+  static async Task<IResult> UpdateCustomer(CustomerRepository repo, Customer model)
   {
     return Results.Ok(await repo.UpdateCustomer(model));
   }
 
-  private async Task<IResult> DeleteCustomer(CustomerRepository repo, int id)
+  static async Task<IResult> DeleteCustomer(CustomerRepository repo, int id)
   {
     var result = await repo.DeleteCustomer(id);
     if (result) return Results.Ok();

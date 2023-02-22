@@ -60,8 +60,7 @@ public static class ExtensionMethods
   /// <exception cref="MinimalApiDiscoverException"></exception>
   public static IServiceCollection AddApis(this IServiceCollection coll,
     Assembly[]? searchAssemblies = null,
-    ServiceLifetime lifetime = ServiceLifetime,
-    )
+    ServiceLifetime lifetime = ServiceLifetime.Transient)
   {
     try
     {
