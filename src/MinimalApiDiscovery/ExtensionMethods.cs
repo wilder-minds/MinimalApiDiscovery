@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -25,6 +26,7 @@ public static class ExtensionMethods
   /// <param name="assembly">A single assembly.</param>
   /// <param name="lifetime">Type of lifetime required for the APIs. Defaults to Transient</param>
   /// <returns>The same service collection.</returns>
+  [Obsolete("No longer need to use the Service Collection")]
   public static IServiceCollection AddApis(this IServiceCollection coll,
     Assembly assembly,
     ServiceLifetime lifetime = ServiceLifetime.Transient)
@@ -40,6 +42,7 @@ public static class ExtensionMethods
   /// <param name="coll">The service collection.</param>
   /// <param name="lifetime">Type of lifetime required for the APIs. Defaults to Transient.</param>
   /// <returns>The same service collection.</returns>
+  [Obsolete("No longer need to use the Service Collection")]
   public static IServiceCollection AddApis(this IServiceCollection coll,
     ServiceLifetime lifetime)
   {
@@ -57,7 +60,8 @@ public static class ExtensionMethods
   /// </param>
   /// <param name="lifetime">Type of lifetime required for the APIs. Defaults to Transient</param>
   /// <returns>The same service collection.</returns>
-  /// <exception cref="MinimalApiDiscoverException"></exception>
+  /// <exception cref="MinimalApiDiscoveryException"></exception>
+  [Obsolete("No longer need to use the Service Collection")]
   public static IServiceCollection AddApis(this IServiceCollection coll,
     Assembly[]? searchAssemblies = null,
     ServiceLifetime lifetime = ServiceLifetime.Transient)
@@ -99,7 +103,7 @@ public static class ExtensionMethods
     }
     catch (Exception ex)
     {
-      throw new MinimalApiDiscoverException("Exception thrown while adding IApi Classes to Service Collection", ex);
+      throw new MinimalApiDiscoveryException("Exception thrown while adding IApi Classes to Service Collection", ex);
     }
   }
 
@@ -108,30 +112,108 @@ public static class ExtensionMethods
   /// This method allows you to call <seealso cref="IApi.Register"/> 
   /// on all services that implement the IApi type.
   /// </summary>
-  /// <param name="app">
+  /// <param name="app"></param>
+  /// <param name="assembly">The assembly to look for IApi types</param>
+  /// <returns>The same WebApplication object.</returns>
+  /// <exception cref="MinimalApiDiscoveryException"></exception>
+  public static IEndpointRouteBuilder MapApis(this IEndpointRouteBuilder app,
+    Assembly assembly)
+  {
+    return app.MapApis(new Assembly[] { assembly });
+  }
+
+  /// <summary>
+  /// This method allows you to call <seealso cref="IApi.Register"/> 
+  /// on all services that implement the IApi type.
+  /// </summary>
+  /// <param name="builder"></param>
+  /// <param name="apis">Collection of IApi objects to register.</param>
+  /// <returns>The same WebApplication object.</returns>
+  /// <exception cref="MinimalApiDiscoveryException"></exception>
+  public static IEndpointRouteBuilder MapApis(this IEndpointRouteBuilder builder,
+    params Type[] apis)
+  {
+    return CreateAndRegister(builder, apis);
+  }
+
+  /// <summary>
+  /// This method allows you to call <seealso cref="IApi.Register"/> 
+  /// on all services that implement the IApi type.
+  /// </summary>
+  /// <param name="builder">
   /// The Web Application to register the 
   /// <seealso cref="IApi"/> derived classes.
   /// </param>
+  /// <param name="searchAssemblies">An array of assemblies to search for IApi implemented classes.
+  /// </param>
   /// <returns>The same WebApplication object.</returns>
-  /// <exception cref="MinimalApiDiscoverException"></exception>
-  public static WebApplication MapApis(this WebApplication app)
+  /// <exception cref="MinimalApiDiscoveryException"></exception>
+  public static IEndpointRouteBuilder MapApis(this IEndpointRouteBuilder builder,
+    Assembly[]? searchAssemblies = null)
   {
     try
     {
-      var apis = app.Services.GetServices<IApi>();
-
-      foreach (var api in apis)
+      // Default to all assemblies
+      if (searchAssemblies is null || !searchAssemblies.Any())
       {
-        if (api is null) throw new InvalidProgramException("Apis not found");
-
-        api.Register(app);
+        searchAssemblies = AppDomain.CurrentDomain.GetAssemblies();
       }
 
-      return app;
+      // Check all assemblies
+      foreach (var assembly in searchAssemblies)
+      {
+        // Find the IApi types
+        var apiTypes = assembly.GetTypes()
+          .Where(t => t.IsAssignableTo(typeof(IApi)) && t.IsClass && !t.IsAbstract)
+          .ToArray();
+
+
+        CreateAndRegister(builder, apiTypes);
+      }
+
+      return builder;
     }
     catch (Exception ex)
     {
-      throw new MinimalApiDiscoverException("Exception thrown while registering IApi Classes", ex);
+      throw new MinimalApiDiscoveryException($"Failed to find IApi types: {ex}");
+    }
+  }
+
+
+  private static IEndpointRouteBuilder CreateAndRegister(IEndpointRouteBuilder builder,
+    Type[] apiTypes)
+  {
+
+    try
+    {
+
+      // Add them all to the Service Collection
+      foreach (var apiType in apiTypes)
+      {
+        var ctors = apiType.GetConstructors();
+        foreach (var c in ctors)
+        {
+          if (c.GetParameters().Length != 0)
+          {
+            var factory = LoggerFactory.Create(cfg => cfg.AddConsole());
+            var logger = factory.CreateLogger("MinimalApiDiscovery");
+            logger.LogWarning("Using Constructor Injection on classes registered through IApi will cause a long-lived singleton. Please only use parameter injection.");
+            throw new MinimalApiDiscoveryException("Api classes require an empty constructor.");
+          }
+        }
+        if (apiType is null) throw new MinimalApiDiscoveryException("Apis not found");
+
+        var newInstance = Activator.CreateInstance(apiType);
+        if (newInstance is null) throw new MinimalApiDiscoveryException($"Could not create Api class: {apiType.Name}");
+        IApi api = (IApi)newInstance;
+        api.Register(builder);
+
+      }
+      return builder;
+    }
+    catch (Exception ex)
+    {
+      throw new MinimalApiDiscoveryException("Exception thrown while registering IApi Classes", ex);
     }
   }
 }

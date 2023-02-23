@@ -6,7 +6,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddTransient<CustomerRepository>();
 builder.Services.AddTransient<StateCollection>();
-builder.Services.AddApis();
 
 var app = builder.Build();
 

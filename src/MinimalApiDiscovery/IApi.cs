@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Routing;
 
 namespace WilderMinds.MinimalApiDiscovery;
 
@@ -11,6 +12,6 @@ public interface IApi
   /// <summary>
   /// This is automatically called by the library to add your APIs
   /// </summary>
-  /// <param name="app">The WebApplication object to register the API </param>
-  void Register(WebApplication app);
+  /// <param name="builder">The Endpoint Route Builder object to register the API </param>
+  void Register(IEndpointRouteBuilder builder);
 }

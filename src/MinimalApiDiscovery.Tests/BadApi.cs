@@ -8,11 +8,19 @@ using WilderMinds.MinimalApiDiscovery;
 
 namespace MinimalApiDiscovery.Tests;
 
-public class DumbApi : IApi
+public class BadApi : IApi
 {
+  private ILogger<BadApi> _logger;
+
+  public BadApi(ILogger<BadApi> logger)
+  {
+    _logger = logger;
+  }
+
   public void Register(IEndpointRouteBuilder builder)
   {
-    builder.MapGet("/api", Get);
+    _logger.LogInformation("Mapping APIs");
+    builder.MapGet("/api/bad", Get);
   }
 
   static IResult Get() => Results.Ok("Works");
