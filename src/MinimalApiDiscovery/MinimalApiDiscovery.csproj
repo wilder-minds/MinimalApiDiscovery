@@ -18,7 +18,7 @@
     <PackageTags>C#,Minimal APIs, ASP.NET Core</PackageTags>
     <PackageReleaseNotes>[Version History](https://github.com/wilder-minds/MinimalApiDiscovery/blob/main/VersionHistory.md)</PackageReleaseNotes>
     <AssemblyVersion>1.0.0</AssemblyVersion>
-    <FileVersion>1.0.0-alpha</FileVersion>
+    <FileVersion>1.0.0</FileVersion>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <IsPackable>true</IsPackable>
     <Version>1.0.0-alpha</Version>
