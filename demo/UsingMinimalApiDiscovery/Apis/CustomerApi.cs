@@ -7,20 +7,10 @@ namespace UsingMinimalApiDiscovery.Apis;
 
 public class CustomerApi : IApi
 {
-  private CustomerRepository _repo;
 
-  // MinimalApiDiscovery will log a warning because
-  // the repo will become a singleton and lifetime 
-  // will be tied to the implementation methods.
-  // Better to use method injection in this case.
-  public CustomerApi(CustomerRepository repo)
+  public void Register(IEndpointRouteBuilder builder)
   {
-    _repo = repo;
-  }
-
-  public void Register(WebApplication app)
-  {
-    var grp = app.MapGroup("/api/customers");
+    var grp = builder.MapGroup("/api/customers");
     grp.MapGet("", GetCustomers);
     grp.MapGet("", GetCustomer);
     grp.MapPost("{id:int}", SaveCustomer);

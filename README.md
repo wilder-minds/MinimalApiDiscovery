@@ -38,8 +38,8 @@ public interface IApi
   /// <summary>
   /// This is automatically called by the library to add your APIs
   /// </summary>
-  /// <param name="app">The WebApplication object to register the API </param>
-  void Register(WebApplication app);
+  /// <param name="builder">The IEndpointRouteBuilder object to register the API </param>
+  void Register(IEndpointRouteBuilder builder);
 }
 ```
 
@@ -52,9 +52,9 @@ namespace UsingMinimalApiDiscovery.Apis;
 
 public class StateApi : IApi
 {
-  public void Register(WebApplication app)
+  public void Register(IEndpointRouteBuilder builder)
   {
-    app.MapGet("/api/states", (StateCollection states) =>
+    builder.MapGet("/api/states", (StateCollection states) =>
     {
       return states;
     });
@@ -73,9 +73,9 @@ namespace UsingMinimalApiDiscovery.Apis;
 
 public class CustomerApi : IApi
 {
-  public void Register(WebApplication app)
+  public void Register(IEndpointRouteBuilder builder)
   {
-    var grp = app.MapGroup("/api/customers");
+    var grp = builder.MapGroup("/api/customers");
     grp.MapGet("", GetCustomers);
     grp.MapGet("", GetCustomer);
     grp.MapPost("{id:int}", SaveCustomer);
@@ -123,9 +123,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 // ...
 
-// Add all classes that implement the IApi to the Service Collection
-builder.Services.AddApis();
-
 var app = builder.Build();
 
 // Get all IApi dependencies and call Register on them all.
@@ -134,10 +131,10 @@ app.MapApis();
 app.Run();
 ```
 
-The calls to `AddApis()` and `MapApis()` just do the service collection work then call the MapApis for all IApi implemented classes. By default `AddApis()` searches all the assemblies in the AppDomain, but you can pass in your own Assemblies to limit the search if you need to:
+The call to `MapApis()` searches assemblies for classes that implement `IApi`. By default `MapApis()` searches all the assemblies in the AppDomain, but you can pass in your own Assemblies to limit the search if you need to:
 
 ```csharp
-builder.Services.AddApis(Assembly.GetEntryAssembly());
+app.MapApis(Assembly.GetEntryAssembly());
 ```
 
 If you think this is getting closer to just using Controllers, you're right. The line between this idea and controllers is pretty small but does not require a naming convention or limits the namespaces/folders to keep your APIs. You could implement the API near the Razor/Blazor pages if you want. 

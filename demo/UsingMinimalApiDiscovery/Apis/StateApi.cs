@@ -5,9 +5,9 @@ namespace UsingMinimalApiDiscovery.Apis;
 
 public class StateApi : IApi
 {
-  public void Register(WebApplication app)
+  public void Register(IEndpointRouteBuilder builder)
   {
-    app.MapGet("/api/states", (StateCollection states) =>
+    builder.MapGet("/api/states", (StateCollection states) =>
     {
       return states;
     });
