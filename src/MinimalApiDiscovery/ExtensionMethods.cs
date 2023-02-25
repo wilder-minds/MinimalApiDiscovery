@@ -74,6 +74,9 @@ public static class ExtensionMethods
         searchAssemblies = AppDomain.CurrentDomain.GetAssemblies();
       }
 
+      var factory = LoggerFactory.Create(cfg => cfg.AddConsole());
+      var logger = factory.CreateLogger("MinimalApiDiscovery");
+
       // Check all assemblies
       foreach (var assembly in searchAssemblies)
       {
@@ -90,13 +93,16 @@ public static class ExtensionMethods
           {
             if (c.GetParameters().Length != 0)
             {
-              var factory = LoggerFactory.Create(cfg => cfg.AddConsole());
-              var logger = factory.CreateLogger("MinimalApiDiscovery");
               logger.LogWarning("Using Constructor Injection on classes registered through IApi will cause a long-lived singleton. Please only use parameter injection.");
               break;
             }
           }
-          coll.Add(new ServiceDescriptor(typeof(IApi), api, lifetime));
+          var existingApis = coll.Where(d => d.ServiceType == typeof(IApi)).ToList();
+          logger.LogWarning("IApi classes already registered, make sure you're not calling AddApis twice.");
+          if (!existingApis.Any(d => d.ImplementationType == api))
+          {
+            coll.Add(new ServiceDescriptor(typeof(IApi), api, lifetime));
+          }
         }
       }
       return coll;
