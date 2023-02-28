@@ -8,3 +8,4 @@
 - 1.0.0: Removed need to AddApis in service collection
 - 1.0.1: Changed from reflection to Source Generation
 - 1.0.2: Fixed issue with including the source generator
+- 1.0.3: Properly including the source generator in the package

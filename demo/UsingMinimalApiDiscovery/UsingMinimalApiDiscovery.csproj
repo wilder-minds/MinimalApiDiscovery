@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="WilderMinds.MinimalApiDiscovery" Version="1.0.1-beta" />
+    <PackageReference Include="WilderMinds.MinimalApiDiscovery" Version="1.0.3-beta" />
   </ItemGroup>
 
 </Project>

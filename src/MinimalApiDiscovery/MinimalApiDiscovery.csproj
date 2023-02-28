@@ -9,26 +9,29 @@
     <OutputType>Library</OutputType>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <Title>MinimalApiDiscovery</Title>
-    <Authors>Shawn WIldermuth</Authors>
+    <Authors>Shawn Wildermuth</Authors>
     <Company>Wilder Minds LLC</Company>
-    <Description>A utility library to allow for structuring Minimal APIs and registering them via reflection.</Description>
+    <Description>A utility library to allow for structuring Minimal APIs and registering them via source generator.</Description>
     <Copyright>2023, Wilder Minds LLC</Copyright>
     <PackageProjectUrl>https://github.com/wilder-minds/minimalapidiscovery</PackageProjectUrl>
     <RepositoryUrl>https://github.com/wilder-minds/minimalapidiscovery</RepositoryUrl>
     <PackageTags>C#,Minimal APIs, ASP.NET Core</PackageTags>
     <PackageReleaseNotes>[Version History](https://github.com/wilder-minds/MinimalApiDiscovery/blob/main/VersionHistory.md)</PackageReleaseNotes>
-    <AssemblyVersion>1.0.2</AssemblyVersion>
-    <FileVersion>1.0.2</FileVersion>
+    <AssemblyVersion>1.0.3</AssemblyVersion>
+    <FileVersion>1.0.3</FileVersion>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <IsPackable>true</IsPackable>
-    <Version>1.0.2-beta</Version>
+    <Version>1.0.3-beta</Version>
     <PackageIcon>icon.png</PackageIcon>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MinimalApiDiscoveryGenerator\MinimalApiDiscoveryGenerator.csproj" />
+    <None Include="..\MinimalApiDiscoveryGenerator\bin\$(Configuration)\netstandard2.0\MinimalApiDiscoveryGenerator.dll"
+          Pack="true"
+          PackagePath="analyzers/dotnet/cs"
+          Visible="false" />
   </ItemGroup>
 
   <ItemGroup>
@@ -47,13 +50,6 @@
   </ItemGroup>
 
 
-  <ItemGroup>
-    <None Include="$(OutputPath)\MinimalApiDiscoveryGenerator.dll"
-          Pack="true"
-          PackagePath="analyzers/dotnet/cs"
-          Visible="false" />
-  </ItemGroup>
-  
   <ItemGroup>
     <None Update="icon.png">
       <Pack>True</Pack>
