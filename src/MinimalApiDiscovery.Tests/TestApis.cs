@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestPlatform.TestHost;
 using MinimalApiDiscovery.Tests;
+using WilderMinds.MinimalApiDiscovery;
 
 namespace WilderMinds.MinimalApiDiscovery.Tests;
 
@@ -67,7 +68,7 @@ public class TestServiceCollectionApis
   public void TestApiRegistration()
   {
     var app = _builder.Build();
-    app.MapApis(typeof(DumbApi));
+    app.MapApis();
     IEndpointRouteBuilder routes = app;
     Assert.NotEmpty(routes.DataSources);
     var dataSources = routes.DataSources.ToList();
@@ -86,7 +87,7 @@ public class TestServiceCollectionApis
   public void TestEmptyConstructor()
   {
     var app = _builder.Build();
-    Assert.Throws<MinimalApiDiscoveryException>(() => app.MapApis(typeof(BadApi)));
+    Assert.Throws<MinimalApiDiscoveryException>(() => app.MapApis());
   }
 
 }
