@@ -12,10 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\MinimalApiDiscoveryGenerator\MinimalApiDiscoveryGenerator.csproj" 
-                      OutputItemType="Analyzer"
-                      ReferenceOutputAssembly="true" />
-    <ProjectReference Include="..\..\src\MinimalApiDiscovery\MinimalApiDiscovery.csproj" />
+    <PackageReference Include="WilderMinds.MinimalApiDiscovery" Version="1.0.1-beta" />
   </ItemGroup>
 
 </Project>

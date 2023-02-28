@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MinimalApiDiscovery", "Mini
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MinimalApiDiscovery.Tests", "MinimalApiDiscovery.Tests\MinimalApiDiscovery.Tests.csproj", "{8BF55981-2615-4565-B4DA-F5A8CF8703CA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UsingMinimalApiDiscovery", "..\demo\UsingMinimalApiDiscovery\UsingMinimalApiDiscovery.csproj", "{73323367-0E50-4329-BAD1-50303F15E1B0}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2BE56ABD-85C3-4D29-BD8B-5B168DCE26FA}"
 	ProjectSection(SolutionItems) = preProject
 		..\.editorconfig = ..\.editorconfig
@@ -18,7 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\VersionHistory.md = ..\VersionHistory.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinimalApiDiscoveryGenerator", "MinimalApiDiscoveryGenerator\MinimalApiDiscoveryGenerator.csproj", "{4405BDDC-29E1-4F8B-8AD0-BD1AFE4A026D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MinimalApiDiscoveryGenerator", "MinimalApiDiscoveryGenerator\MinimalApiDiscoveryGenerator.csproj", "{4405BDDC-29E1-4F8B-8AD0-BD1AFE4A026D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,10 +32,6 @@ Global
 		{8BF55981-2615-4565-B4DA-F5A8CF8703CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8BF55981-2615-4565-B4DA-F5A8CF8703CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8BF55981-2615-4565-B4DA-F5A8CF8703CA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{73323367-0E50-4329-BAD1-50303F15E1B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{73323367-0E50-4329-BAD1-50303F15E1B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{73323367-0E50-4329-BAD1-50303F15E1B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{73323367-0E50-4329-BAD1-50303F15E1B0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4405BDDC-29E1-4F8B-8AD0-BD1AFE4A026D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4405BDDC-29E1-4F8B-8AD0-BD1AFE4A026D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4405BDDC-29E1-4F8B-8AD0-BD1AFE4A026D}.Release|Any CPU.ActiveCfg = Release|Any CPU
