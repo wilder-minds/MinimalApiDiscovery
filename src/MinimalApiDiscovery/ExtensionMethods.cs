@@ -25,6 +25,7 @@ public static class ExtensionMethods
   /// <param name="assembly">A single assembly.</param>
   /// <param name="lifetime">Type of lifetime required for the APIs. Defaults to Transient</param>
   /// <returns>The same service collection.</returns>
+  [Obsolete]
   public static IServiceCollection AddApis(this IServiceCollection coll,
     Assembly assembly,
     ServiceLifetime lifetime = ServiceLifetime.Transient)
@@ -40,6 +41,7 @@ public static class ExtensionMethods
   /// <param name="coll">The service collection.</param>
   /// <param name="lifetime">Type of lifetime required for the APIs. Defaults to Transient.</param>
   /// <returns>The same service collection.</returns>
+  [Obsolete]
   public static IServiceCollection AddApis(this IServiceCollection coll,
     ServiceLifetime lifetime)
   {
@@ -58,57 +60,38 @@ public static class ExtensionMethods
   /// <param name="lifetime">Type of lifetime required for the APIs. Defaults to Transient</param>
   /// <returns>The same service collection.</returns>
   /// <exception cref="MinimalApiDiscoverException"></exception>
+  [Obsolete]
   public static IServiceCollection AddApis(this IServiceCollection coll,
     Assembly[]? searchAssemblies = null,
     ServiceLifetime lifetime = ServiceLifetime.Transient)
   {
-    try
-    {
-      // Default to all assemblies
-      if (searchAssemblies is null || !searchAssemblies.Any())
-      {
-        searchAssemblies = AppDomain.CurrentDomain.GetAssemblies();
-      }
-
-      var factory = LoggerFactory.Create(cfg => cfg.AddConsole());
-      var logger = factory.CreateLogger("MinimalApiDiscovery");
-
-      // Check all assemblies
-      foreach (var assembly in searchAssemblies)
-      {
-        // Find the IApi types
-        var apis = assembly.GetTypes()
-          .Where(t => t.IsAssignableTo(typeof(IApi)) && t.IsClass && !t.IsAbstract)
-          .ToArray();
-
-        // Add them all to the Service Collection
-        foreach (var api in apis)
-        {
-          var ctors = api.GetConstructors();
-          foreach (var c in ctors)
-          {
-            if (c.GetParameters().Length != 0)
-            {
-              logger.LogWarning("Using Constructor Injection on classes registered through IApi will cause a long-lived singleton. Please only use parameter injection.");
-              break;
-            }
-          }
-          var existingApis = coll.Where(d => d.ServiceType == typeof(IApi)).ToList();
-          logger.LogWarning("IApi classes already registered, make sure you're not calling AddApis twice.");
-          if (!existingApis.Any(d => d.ImplementationType == api))
-          {
-            coll.Add(new ServiceDescriptor(typeof(IApi), api, lifetime));
-          }
-        }
-      }
-      return coll;
-    }
-    catch (Exception ex)
-    {
-      throw new MinimalApiDiscoverException("Exception thrown while adding IApi Classes to Service Collection", ex);
-    }
+    // NOOP
+    return coll;
   }
 
+  private static Type[] GetApiTypes(Assembly assembly, ILogger logger)
+  {
+    // Find the IApi types
+    var apis = assembly.GetTypes()
+      .Where(t => t.IsAssignableTo(typeof(IApi)) && t.IsClass && !t.IsAbstract)
+      .ToArray();
+
+    // Test to make sure they have empty constructors
+    foreach (var api in apis)
+    {
+      var ctors = api.GetConstructors();
+      foreach (var c in ctors)
+      {
+        if (c.GetParameters().Length != 0)
+        {
+          logger.LogWarning("Using Constructor Injection on classes registered through IApi will cause a long-lived singleton. Please only use parameter injection.");
+          break;
+        }
+      }
+    }
+
+    return apis;
+  }
 
   /// <summary>
   /// This method allows you to call <seealso cref="IApi.Register"/> 
@@ -118,21 +101,34 @@ public static class ExtensionMethods
   /// The Web Application to register the 
   /// <seealso cref="IApi"/> derived classes.
   /// </param>
+  /// <param name="apiAssemblies">Assemblies to look for IApi classes.</param>
   /// <returns>The same WebApplication object.</returns>
   /// <exception cref="MinimalApiDiscoverException"></exception>
-  public static WebApplication MapApis(this WebApplication app)
+  public static WebApplication MapApis(this WebApplication app, Assembly[]? apiAssemblies = null)
   {
     try
     {
-      var apis = app.Services.GetServices<IApi>();
 
-      foreach (var api in apis)
+      apiAssemblies = apiAssemblies ?? AppDomain.CurrentDomain.GetAssemblies();
+
+      var factory = LoggerFactory.Create(cfg => cfg.AddConsole());
+      var logger = factory.CreateLogger("MinimalApiDiscovery");
+
+      foreach (var assembly in apiAssemblies)
       {
-        if (api is null) throw new MinimalApiDiscoverException("Apis not found");
+        if (assembly is not null)
+        {
+          var apis = GetApiTypes(assembly, logger);
 
-        api.Register(app);
+          foreach (var apiType in apis)
+          {
+            var api = Activator.CreateInstance(apiType) as IApi;
+            if (api is null) throw new MinimalApiDiscoverException("Apis not found");
+
+            api.Register(app);
+          }
+        }
       }
-
       return app;
     }
     catch (Exception ex)
@@ -140,4 +136,21 @@ public static class ExtensionMethods
       throw new MinimalApiDiscoverException("Exception thrown while registering IApi Classes", ex);
     }
   }
+
+  /// <summary>
+  /// This method allows you to call <seealso cref="IApi.Register"/> 
+  /// on all services that implement the IApi type.
+  /// </summary>
+  /// <param name="app">
+  /// The Web Application to register the 
+  /// <seealso cref="IApi"/> derived classes.
+  /// </param>
+  /// <param name="apiAssembly">The assembly to search.</param>
+  /// <returns>The same WebApplication object.</returns>
+  /// <exception cref="MinimalApiDiscoverException"></exception>
+  public static WebApplication MapApis(this WebApplication app, Assembly apiAssembly)
+  {
+    return MapApis(app, new Assembly[] { apiAssembly });
+  }
+
 }

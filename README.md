@@ -1,5 +1,7 @@
 # MinimalApiDiscovery
 
+Current Release: 0.2.2
+
 This project is aimed to simplify the registration of Minimal APIs 
 as projects grow. This is an idea I've been fumbling with for a few 
 months and thought I'd put it into code. The project is open to PRs 
@@ -113,7 +115,7 @@ public class CustomerApi : IApi
 }
 ```
 
-In this example, I'm using a Mapping Group as well as just using methods to implement the business logic. To wire it all together there are two calls to make in your startup:
+In this example, I'm using a Mapping Group as well as just using methods to implement the business logic. To wire it all together there are one call to make in your startup:
 
 ```csharp
 //Program.cs
@@ -123,21 +125,18 @@ var builder = WebApplication.CreateBuilder(args);
 
 // ...
 
-// Add all classes that implement the IApi to the Service Collection
-builder.Services.AddApis();
-
 var app = builder.Build();
 
-// Get all IApi dependencies and call Register on them all.
+// Get all IApi Classes and call Register on them all.
 app.MapApis();
 
 app.Run();
 ```
 
-The calls to `AddApis()` and `MapApis()` just do the service collection work then call the MapApis for all IApi implemented classes. By default `AddApis()` searches all the assemblies in the AppDomain, but you can pass in your own Assemblies to limit the search if you need to:
+The call to `MapApis()` just scans assemblies and then call the Register on all the classesfor all IApi implemented classes. By default `AddApis()` searches all the assemblies in the AppDomain, but you can pass in your own Assemblies to limit the search if you need to:
 
 ```csharp
-builder.Services.AddApis(Assembly.GetEntryAssembly());
+app.MapApis(Assembly.GetEntryAssembly());
 ```
 
 If you think this is getting closer to just using Controllers, you're right. The line between this idea and controllers is pretty small but does not require a naming convention or limits the namespaces/folders to keep your APIs. You could implement the API near the Razor/Blazor pages if you want. 

@@ -19,53 +19,8 @@ public class TestServiceCollectionApis
   }
 
   [Fact]
-  public void TestServiceCollectionDefaults()
-  {
-    _builder.Services.AddApis();
-    var app = _builder.Build();
-    var apis = app.Services.GetServices<IApi>();
-    Assert.Single(apis);
-  }
-
-  [Fact]
-  public void TestServiceCollectionByAssembly()
-  {
-    _builder.Services.AddApis(Assembly.GetExecutingAssembly());
-    var app = _builder.Build();
-    var apis = app.Services.GetServices<IApi>();
-    Assert.Single(apis);
-  }
-
-  [Fact]
-  public void TestServiceCollectionLifetime()
-  {
-    _builder.Services.AddApis();
-    foreach (var api in _builder.Services)
-    {
-      if (api.ServiceType == typeof(IApi))
-      {
-        Assert.True(api.Lifetime == ServiceLifetime.Transient);
-      }
-    }
-  }
-
-  [Fact]
-  public void TestServiceCollectionScoped()
-  {
-    _builder.Services.AddApis(ServiceLifetime.Scoped);
-    foreach (var api in _builder.Services)
-    {
-      if (api.ServiceType == typeof(IApi))
-      {
-        Assert.True(api.Lifetime == ServiceLifetime.Scoped);
-      }
-    }
-  }
-
-  [Fact]
   public void TestApiRegistration()
   {
-    _builder.Services.AddApis();
     var app = _builder.Build();
     app.MapApis();
     IEndpointRouteBuilder routes = app;
