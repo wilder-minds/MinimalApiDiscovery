@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -13,25 +14,20 @@ using Microsoft.CodeAnalysis.Text;
 namespace MinimalApiDiscoveryGenerator;
 
 [Generator]
-public class MapApiGenerator : IIncrementalGenerator 
+public class MapApiGenerator : IIncrementalGenerator
 {
   public void Initialize(IncrementalGeneratorInitializationContext context)
   {
     var apiClasses = context.SyntaxProvider
       .CreateSyntaxProvider(predicate: static (s, _) => IsTarget(s),
-        transform: static (ctx, _) => GetTarget(ctx))
-      .Where(static m => m is not null);
+        transform: (n, cn) => GetTarget(n, cn))
+      .Where(static m => m.Valid);
 
-    var compilation = context.CompilationProvider.Combine(apiClasses.Collect());
-
-    context.RegisterSourceOutput(compilation,
-            static (spc, source) => Execute(source.Left, source.Right, spc));
+    context.RegisterSourceOutput(apiClasses.Collect(), Execute);
 
   }
 
-  static void Execute(Compilation compilation, 
-    ImmutableArray<TypeDeclarationSyntax> typeList, 
-    SourceProductionContext context)
+  static void Execute(SourceProductionContext context, ImmutableArray<(string Name, bool Warn, bool Valid)> typeList)
   {
     if (typeList.IsDefaultOrEmpty)
     {
@@ -39,7 +35,7 @@ public class MapApiGenerator : IIncrementalGenerator
       return;
     }
 
-   
+
     if (typeList.Count() > 0)
     {
 
@@ -63,37 +59,25 @@ namespace WilderMinds.MinimalApiDiscovery
 
       foreach (var api in typeList)
       {
-        SemanticModel semanticModel = compilation.GetSemanticModel(api.SyntaxTree);
-        if (semanticModel.GetDeclaredSymbol(api) is not INamedTypeSymbol apiSymbol)
+        if (api.Warn)
         {
-          // something went wrong, bail out
-          continue;
+          // Write error out if no constructors have zero parameters
+          context.ReportDiagnostic(Diagnostic.Create(
+                new DiagnosticDescriptor(
+                    "SG0001",
+                    "Api Classes should have an empty constructor",
+                    "Cannot register {0} class without an empty constructor. Using state {0} class's constructor will create an unintentional singleton",
+                    "Problem",
+                    DiagnosticSeverity.Warning,
+                    true),
+                Location.None,
+                api.Name));
         }
-
-        // Test for abstract and that some
-        if (!apiSymbol.IsAbstract)
+        else
         {
-          var apiClassName = apiSymbol.ToString();
-          if (!apiSymbol.Constructors.Any(c => c.Parameters.Count() == 0))
-          {
-            // Write error out if no constructors have zero parameters
-            context.ReportDiagnostic(Diagnostic.Create(
-                  new DiagnosticDescriptor(
-                      "SG0001",
-                      "Api Classes should have an empty constructor",
-                      "Cannot register {0} class without an empty constructor. Using state {0} class's constructor will create an unintentional singleton",
-                      "Problem",
-                      DiagnosticSeverity.Warning,
-                      true),
-                  apiSymbol.Locations.FirstOrDefault(),
-                  apiSymbol.ToDisplayString()));
-          }
-          else
-          {
-            sb.Append($@"
-      new global::{apiClassName}().Register(app);");
+          sb.Append($@"
+      new global::{api.Name}().Register(app);");
 
-          }
         }
       }
 
@@ -108,27 +92,37 @@ namespace WilderMinds.MinimalApiDiscovery
     }
   }
 
-  static TypeDeclarationSyntax GetTarget(GeneratorSyntaxContext ctx)
+  static void Debug()
   {
-    var theClass = (ClassDeclarationSyntax)ctx.Node;
+    if (!Debugger.IsAttached) Debugger.Launch();
+  }
 
-    var classSymbol = ctx.SemanticModel.GetDeclaredSymbol(theClass);
-    if (classSymbol.AllInterfaces.Count() > 0)
+  static (string Name, bool Warn, bool Valid) GetTarget(GeneratorSyntaxContext ctx, CancellationToken cn)
+  {
+    var syntax = (ClassDeclarationSyntax)ctx.Node;
+    var symbol = ctx.SemanticModel.GetDeclaredSymbol(syntax, cn);
+
+    if (!symbol.IsAbstract)
     {
-      // Get all interfaces (class and subclasses)
-      foreach (var  symbol in classSymbol.AllInterfaces)
+      if (symbol.AllInterfaces.Count() > 0)
       {
-        if (symbol.ToDisplayString().Contains("IApi"))
+        // Get all interfaces (class and subclasses)
+        foreach (var iSymbol in symbol.AllInterfaces)
         {
-          return theClass;
+          if (iSymbol.ToDisplayString().Contains("IApi"))
+          {
+            return (
+              Name: symbol.ToDisplayString(),
+              Warn: !(symbol.Constructors.Any(c => c.Parameters.Count() == 0)),
+              Valid: true);
+          }
         }
       }
     }
 
-    return null;
+    return (Name: "", Warn: false, Valid: false);
   }
 
   static bool IsTarget(SyntaxNode node) => node is ClassDeclarationSyntax;
-
 
 }
