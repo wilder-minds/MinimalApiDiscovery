@@ -84,27 +84,27 @@ public class CustomerApi : IApi
   }
 
   // Using static methods to ensure that the class doesn't hold state
-  static async Task<IResult> GetCustomers(CustomerRepository repo)
+  public static async Task<IResult> GetCustomers(CustomerRepository repo)
   {
     return Results.Ok(await repo.GetCustomers());
   }
 
-  static async Task<IResult> GetCustomer(CustomerRepository repo, int id)
+  public static async Task<IResult> GetCustomer(CustomerRepository repo, int id)
   {
     return Results.Ok(await repo.GetCustomer(id));
   }
 
-  static async Task<IResult> SaveCustomer(CustomerRepository repo, Customer model)
+  public static async Task<IResult> SaveCustomer(CustomerRepository repo, Customer model)
   {
     return Results.Created($"/api/customer/{model.Id}", await repo.SaveCustomer(model));
   }
 
-  static async Task<IResult> UpdateCustomer(CustomerRepository repo, Customer model)
+  public static async Task<IResult> UpdateCustomer(CustomerRepository repo, Customer model)
   {
     return Results.Ok(await repo.UpdateCustomer(model));
   }
 
-  static async Task<IResult> DeleteCustomer(CustomerRepository repo, int id)
+  public static async Task<IResult> DeleteCustomer(CustomerRepository repo, int id)
   {
     var result = await repo.DeleteCustomer(id);
     if (result) return Results.Ok();
@@ -113,7 +113,9 @@ public class CustomerApi : IApi
 }
 ```
 
-In this example, I'm using a Mapping Group as well as just using methods to implement the business logic. To wire it all together there are two calls to make in your startup:
+> Note, you do not have to have to implement the APIs as static methods, but the benefit here is, when made public, you can more easily test these APIs without having to generate the API boilerplate.
+
+In this example, I'm using a Mapping Group as well as just using methods to implement the business logic. To wire it up, jsut call `MapApis()` to register all the APIs:
 
 ```csharp
 //Program.cs
