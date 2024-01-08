@@ -109,7 +109,7 @@ namespace WilderMinds.MinimalApiDiscovery
         // Get all interfaces (class and subclasses)
         foreach (var iSymbol in symbol.AllInterfaces)
         {
-          if (iSymbol.ToDisplayString().Contains("IApi"))
+          if (iSymbol.ToDisplayString().EndsWith("IApi"))
           {
             return (
               Name: symbol.ToDisplayString(),

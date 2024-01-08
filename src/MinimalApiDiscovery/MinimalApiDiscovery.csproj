@@ -17,21 +17,18 @@
     <RepositoryUrl>https://github.com/wilder-minds/minimalapidiscovery</RepositoryUrl>
     <PackageTags>C#,Minimal APIs, ASP.NET Core</PackageTags>
     <PackageReleaseNotes>[Version History](https://github.com/wilder-minds/MinimalApiDiscovery/blob/main/VersionHistory.md)</PackageReleaseNotes>
-    <AssemblyVersion>1.0.4</AssemblyVersion>
+    <AssemblyVersion>1.0.5</AssemblyVersion>
     <FileVersion>1.0.4</FileVersion>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <IsPackable>true</IsPackable>
-    <Version>1.0.4-beta</Version>
+    <Version>1.0.5</Version>
     <PackageIcon>icon.png</PackageIcon>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\MinimalApiDiscoveryGenerator\bin\$(Configuration)\netstandard2.0\MinimalApiDiscoveryGenerator.dll"
-          Pack="true"
-          PackagePath="analyzers/dotnet/cs"
-          Visible="false" />
+    <None Include="..\MinimalApiDiscoveryGenerator\bin\$(Configuration)\netstandard2.0\MinimalApiDiscoveryGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
   </ItemGroup>
 
   <ItemGroup>
