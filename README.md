@@ -1,5 +1,7 @@
 # MinimalApiDiscovery
 
+**NOTE** This Repository has been deprecated and moved to https://github.com/shawnwildermuth/minimalapis
+
 This project is aimed to simplify the registration of Minimal APIs 
 as projects grow. This is an idea I've been fumbling with for a few 
 months and thought I'd put it into code. The project is open to PRs 
